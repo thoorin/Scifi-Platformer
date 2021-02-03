@@ -94,7 +94,7 @@ M.onCollision = function( event )
                     game.setStopped(true)
                 end
 
-                blocksContacted = blocksContacted + 150
+                blocksContacted = blocksContacted + 1
                 
                 if (game.getGame()==true) then
                     player:play()
