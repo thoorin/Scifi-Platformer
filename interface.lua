@@ -18,16 +18,10 @@ local composer = require("composer")
 local pauseIcon
 local playIcon
 
-M.setGame = function(g)
-    game = g
-end
-
-M.setCreator = function(c)
-    creator = c
-end
-
-M.setBuilder = function(b)
-    builder = b
+M.setUp = function(g,c,b,cH,fH)
+    game, creator, builder = g, c, b
+    M.setCollisionHandler(cH)
+    M.setFileHandler(fH)
 end
 
 M.setCollisionHandler = function(cH)
@@ -106,7 +100,6 @@ end
 M.screen = function()
     game.setGame(false)
     game.setPressed(false)
-    creator.deleteEnemyArray()
 
     local score = collisionHandler.getScore()
 
@@ -164,14 +157,11 @@ M.screen = function()
     
     local function restartLevel()
         local activeIcon = pauseIcon == nil and playIcon or pauseIcon
-        creator.cancelEnemyTimers()
 
         activeIcon:removeEventListener("tap",activeIcon.onObjectTap)
         display.remove(activeIcon)
         
-        if (creator.getTrollWalk() == true) then audio.pause(creator.getTrollChannel())end
         game.setCanJump(false)
-        game.setTrollWalkPlaying(false)
         audio.stop(31)
         Runtime:removeEventListener( "tap", replayBtn )
         Runtime:removeEventListener( "tap", closeBtn )
@@ -180,9 +170,6 @@ M.screen = function()
         collisionHandler.destroyParticles()
 
         timer.cancelAll()
-
-        --M.setPlayer(c.createPlayer())
-        creator.setTrollWalk(false)
     
         for i in ipairs(elements) do 
             display.remove(elements[i])
@@ -203,7 +190,6 @@ M.screen = function()
     local function closeLevel()
         timer.cancelAll()
         local activeIcon = pauseIcon == nil and playIcon or pauseIcon
-        creator.cancelEnemyTimers()
 
         activeIcon:removeEventListener("tap",activeIcon.onObjectTap)
         display.remove(activeIcon)
@@ -227,7 +213,6 @@ end
 local nextLevel = function()
     timer.cancelAll()
     local activeIcon = pauseIcon == nil and playIcon or pauseIcon
-    creator.cancelEnemyTimers()
     level = level + 1
 
     activeIcon:removeEventListener("tap",activeIcon.onObjectTap)

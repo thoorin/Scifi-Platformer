@@ -11,60 +11,29 @@ local interface
 local blocksArray
 local canJump = false
 local ply
-local enemyTimer
-local shootTimer
 local shoots = false
 local creator
 local stopped
-
 local pressed
 local game = true
 
 local frogAttack = audio.loadSound( "frog_attack.mp3" )
 local blastSound = audio.loadSound( "blast.mp3" )
 local jumpSound = audio.loadSound( "jump.mp3" )
---local trollWalk = audio.loadSound( "troll_steps.mp3" ) 
-local trollWalkPlaying = false
-local trollWalkChannel
-
 local composer
 
 audio.reserveChannels( 0 )
 
 M.resetVariables = function()
-    canJump = false
-    ply = nil
-    if (enemyTimer~=nil) then timer.cancel(enemyTimer) end
-    if (enemyTimer~=nil) then timer.cancel(shootTimer) end
-    shoots = false
-    stopped = false
-    game = true
-    trollWalkPlaying = false 
+    canJump, ply, shoots, stopped, game = false, nil, false, false, true
 end
 
-M.setCreator = function( c )
-    creator = c
+M.setUpGame = function( comp,c,bA,i)
+    composer, creator, blocksArray, interface = comp, c, bA, i
 end
-
-M.setInterface = function( i )
-    interface = i
-end
-
-M.setComposer = function( comp )
-    composer = comp
-end
-
-M.setBlocks = function( blocks )
-    blocksArray = blocks
-end
- 
 
 M.setJump = function( boolean )
     canJump = boolean
-end
-
-M.setTrollWalkPlaying = function( boolean )
-    trollWalkPlaying = boolean
 end
 
 M.getGame = function()
@@ -165,8 +134,7 @@ M.death = function()
     game = false
     ply:setSequence("death")
     ply:play()
-    ply.x = ply.x - 20
-    ply.y = ply.y + 12
+    ply.x, ply.y = ply.x - 20, ply.y + 12
     local vx,vy = ply:getLinearVelocity()
 
     if (vy >= 0) then ply.gravityScale = 0 end
@@ -183,8 +151,6 @@ end
 M.changeBlockDir = function( block )  
     local vx,vy = block:getLinearVelocity()
 
-    print("vx: "..vx.."\nvy: "..vy.."\nname: "..block.myName.."\ndirection: "..block.direction.."\ncontacted: "..tostring(block.contacted))
-
     if (block.direction == "right") then
         block:setLinearVelocity(vx-200,0)
         block.direction = "left"
@@ -192,8 +158,6 @@ M.changeBlockDir = function( block )
         block:setLinearVelocity(vx+200,0)
         block.direction = "right"
     end
-
-    print("vx: "..vx.."\nvy: "..vy.."\nname: "..block.myName.."\ndirection: "..block.direction.."\ncontacted: "..tostring(block.contacted))
 
     timer.performWithDelay(3,function() block.contacted=false 
     end)
@@ -212,7 +176,6 @@ M.gameLoop = function()
 
     local vx,vy = ply:getLinearVelocity()
     if (ply.x < composer.getVariable("playerStartingPosition") - 0.1 and stopped == false and vy == 0) then
-        print("Minus 1, before: "..ply.y)
         ply.y = ply.y - 1
         ply.x = composer.getVariable("playerStartingPosition")
         ply:setLinearVelocity(0,0)
@@ -262,8 +225,6 @@ M.spriteListenerEnemy = function( event )
     local enemy = event.target 
 
     if (enemy.x < 1500 and enemy.sequence == "start") then enemy:setSequence("walk");enemy:play() end
-    if (enemy.x < 1000 and trollWalkPlaying == false and enemy.x > 150 and game == true) then audio.play(trollWalk, {loops = -1, channel = 31}); trollWalkPlaying = true end
-    if (enemy.x < 150 and trollWalkPlaying == true) then timer.performWithDelay(700, function() audio.stop(31); end) trollWalkPlaying = false end
 
     if ( event.phase == "ended" ) then 
         if (enemy.sequence == "die") then
@@ -271,13 +232,8 @@ M.spriteListenerEnemy = function( event )
         end
 
         if (enemy.sequence == "attak") then
-            if (math.abs(enemy.y-ply.y)<60 and game == true) then
-                local detectorsAndEnemies = creator.getDetectorsAndEnemies()
-                local index = table.indexOf(detectorsAndEnemies,enemy)
-                audio.stop(31)
+            if (math.abs(enemy.y-ply.y) < 60 and game) then
                 M.death()
-                detectorsAndEnemies[index+2] = detectorsAndEnemies[index+2]+10
-                detectorsAndEnemies[index+3] = detectorsAndEnemies[index+2]+10  
             end
         end
     end
@@ -285,9 +241,7 @@ end
 
 M.spriteListenerFrog = function( event )
     local frog = event.target 
-
     local speed = 240
-    local detector = frog[#frog]
 
     if (frog.sequence == "attack") then
         if (frog.frame == 15 and frog.x < 1300) then
@@ -308,9 +262,9 @@ M.spriteListenerFrog = function( event )
 
     if (frog.sequence == "jump") then
         if (frog.frame == 13) then 
-            local transitionX = frog[#frog-1] == 1 and 120 or -120
+            local transitionX = frog.direction == "right" and 120 or -120
 
-            detector.x = frog.x + transitionX
+            frog.jumpDetector.x = frog.x + transitionX
 
             if (stopped) then
                 frog:setLinearVelocity(0,0) 
@@ -319,7 +273,7 @@ M.spriteListenerFrog = function( event )
             end
         end
 
-        if (frog.frame == 17 and frog[#frog-1] == 0) then 
+        if (frog.frame == 17 and frog.direction == "left") then 
             frog:setSequence("attack")
             frog:play()
             frog.y = frog.y+12
@@ -329,12 +283,12 @@ M.spriteListenerFrog = function( event )
         if (frog.frame == 3) then
             local vx, vy = frog:getLinearVelocity()
 
-            if (detector[#detector]==0) then 
+            if (frog.jumpDetector.contacted==0) then 
                 frog:scale(-1,1)
-                frog[#frog-1] = frog[#frog-1] == 0 and 1 or 0
+                frog.direction = frog.direction == "left" and "right" or "left"
             end
 
-            if (frog[#frog-1] == 1) then 
+            if (frog.direction == "right") then 
                     frog:setLinearVelocity(vx+speed,0)  
             else
                     frog:setLinearVelocity(vx-speed,0)
@@ -348,12 +302,11 @@ end
 M.spriteListenerLarva = function( event )
     local larva = event.target 
     
-    if (larva.x > 0 and larva.x < 420 and larva[#larva] == false and larva.sequence == "idle") then
+    if (larva.x > 0 and larva.x < 420 and larva.sequence == "idle") then
         larva:setSequence("attack")
         larva:play()
         larva.x = larva.x-15
         larva.y = larva.y-2
-        larva[#larva] = true
     end
 
     if ( event.phase == "ended" ) then 
