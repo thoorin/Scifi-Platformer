@@ -28,7 +28,7 @@ M.resetVariables = function()
     canJump, ply, shoots, stopped, game = false, nil, false, false, true
 end
 
-M.setUpGame = function( comp,c,bA,i)
+M.setUp = function( comp,c,bA,i)
     composer, creator, blocksArray, interface = comp, c, bA, i
 end
 
