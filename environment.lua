@@ -12,38 +12,26 @@ local backGroup = display.newGroup()
 local block, blockTop, blockEndTop, blockStartTop, blockStart, blockEnd, blockBottomEnd, blockBottomEndEdge, blockBottomStart, blockBottomStartEdge, movingBlock, 
     background, stone
 
+M.setEnvironment = function( environment )
+    local suffix = ".png"
 
-
-M.setEnvironment = function( number )
-    if (number == 1) then 
-        background = "BG.png"
-        block = "5.png"
-        blockTop = "2.png"
-        blockEndTop = "3.png"
-        blockStartTop = "1.png"
-        blockStart = "4.png"
-        blockEnd = "6.png"
-        blockBottomEnd = "7.png"
-        blockBottomEndEdge = "8.png"
-        blockBottomStart = "11.png"
-        blockBottomStartEdge = "10.png"
-        movingBlock = "19.png"
-        stone = "Stone.png"
-    elseif (number == 2) then
-        background = "BG_desert.png"
-        block = "5_desert.png"
-        blockTop = "2_desert.png"
-        blockEndTop = "3_desert.png"
-        blockStartTop = "1_desert.png"
-        blockStart = "4_desert.png"
-        blockEnd = "6_desert.png"
-        blockBottomEnd = "7_desert.png"
-        blockBottomEndEdge = "8_desert.png"
-        blockBottomStart = "11_desert.png"
-        blockBottomStartEdge = "10_desert.png"
-        movingBlock = "19_desert.png"
-        stone = "Stone_Desert.png"
+    if (environment == 2) then
+        suffix = "_desert.png"
     end
+    
+        background = "BG"..suffix
+        block = "5"..suffix
+        blockTop = "2"..suffix
+        blockEndTop = "3"..suffix
+        blockStartTop = "1"..suffix
+        blockStart = "4"..suffix
+        blockEnd = "6"..suffix
+        blockBottomEnd = "7"..suffix
+        blockBottomEndEdge = "8"..suffix
+        blockBottomStart = "11"..suffix
+        blockBottomStartEdge = "10"..suffix
+        movingBlock = "19"..suffix
+        stone = "Stone"..suffix
 end
 
 M.getStone = function()
