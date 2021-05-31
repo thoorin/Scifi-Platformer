@@ -2247,9 +2247,8 @@ local function createLevel10()
         c.createGrass2(start + 890, top - 128)
         c.createGrass2(start + 900, top - 128)
         
-
+        c.createEnemy(start + 750, top-128)
         c.createFrog(start + 600, top-128)
-        c.createFrog(start + 750, top-128)
 
         c.createDesertTree(start + 200, top)
         c.createGrass1(start + 38, top)

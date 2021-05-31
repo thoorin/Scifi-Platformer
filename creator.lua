@@ -752,7 +752,6 @@ M.createFrog = function( x, y)
     table.insert( blocksArray, jumpDetector )
 end
 
-
 M.createEnemyTank = function( x, y)
     local enemy = display.newImageRect(backGroup, "tank.png", 128, 88 )
     enemy.x, enemy.y = x, y-45

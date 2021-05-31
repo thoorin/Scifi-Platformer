@@ -17,6 +17,9 @@ local mainGroup = display.newGroup()
 local composer = require("composer")
 local pauseIcon
 local playIcon
+local closeBtn
+local replayBtn
+local continueBtn
 
 M.setUp = function(g,c,b,cH,fH)
     game, creator, builder = g, c, b
@@ -145,12 +148,12 @@ M.screen = function()
     recordValue:setTextColor( 0.9, 0.9, 0.9 )
     table.insert( elements, recordValue)
 
-    local closeBtn = display.newImageRect(mainGroup, "Close_BTN.png", 100, 100)
+    closeBtn = display.newImageRect(mainGroup, "Close_BTN.png", 100, 100)
     closeBtn.x = display.contentWidth-display.actualContentWidth*0.5 - 140
     closeBtn.y = display.contentCenterY + 120
     table.insert( elements, closeBtn)
 
-    local replayBtn = display.newImageRect(mainGroup, "Replay_BTN.png", 100, 100)
+    replayBtn = display.newImageRect(mainGroup, "Replay_BTN.png", 100, 100)
     replayBtn.x = display.contentWidth-display.actualContentWidth*0.5
     replayBtn.y = display.contentCenterY + 120
     table.insert( elements, replayBtn)
@@ -210,15 +213,12 @@ M.screen = function()
     closeBtn:addEventListener( "tap", closeLevel )
 end
 
-local nextLevel = function()
+local function nextLevel()
     timer.cancelAll()
     local activeIcon = pauseIcon == nil and playIcon or pauseIcon
     level = level + 1
 
-    activeIcon:removeEventListener("tap",activeIcon.onObjectTap)
     display.remove(activeIcon)
-    Runtime:removeEventListener( "tap", closeBtn )
-    Runtime:removeEventListener( "tap", replayBtn )
 
     M.setRecord()
 
@@ -226,14 +226,13 @@ local nextLevel = function()
         display.remove(elements[i])
     end
 
-    composer.removeScene( "level", true )
     if (level > 10) then 
         composer.gotoScene("ending") 
-        composer.removeScene("level", true)
     else
         composer.setVariable("lvl", level)
         composer.gotoScene("level")
     end
+    composer.removeScene( "level", true )
     audio.play(clickSound)
 end
 
@@ -249,7 +248,7 @@ M.winScreen = function()
     finished:setTextColor( 0.9, 0.9, 0.9 )
     table.insert( elements, finished)
 
-    local continueBtn = display.newImageRect(mainGroup, "Play_BTN.png", 100, 100)
+    continueBtn = display.newImageRect(mainGroup, "Play_BTN.png", 100, 100)
     continueBtn.x = display.contentWidth-display.actualContentWidth*0.5 + 140
     continueBtn.y = display.contentCenterY + 120
     table.insert( elements, continueBtn)

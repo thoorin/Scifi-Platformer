@@ -16,7 +16,7 @@ function getSceneGroup()
 end
 
 local ar = {}
-local maxRecords = {0,200,650,1025,1275,300,650,850,1500,2475}
+local maxRecords = {0,200,650,1025,1275,300,650,850,1500,2350}
 
 local background
 

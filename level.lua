@@ -106,8 +106,6 @@ function scene:hide( event )
 
 	elseif ( phase == "did" ) then
         -- Code here runs immediately after the scene goes entirely off screen
-        blocksArray = nil
-
         Runtime:removeEventListener( "collision", collisionHandler.onCollision )
         Runtime:removeEventListener( "touch", game.playerEvent )
         package.loaded["creator"] = nil
