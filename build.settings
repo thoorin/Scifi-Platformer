@@ -12,8 +12,11 @@ settings =
 
 	android =
 	{
+                minSdkVersion = "33",
+                largeHeap = true,
 		usesPermissions =
 		{
+
 			"android.permission.INTERNET",
 		},
 	}
